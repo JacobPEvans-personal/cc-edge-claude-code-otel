@@ -2,7 +2,8 @@
 
 ## Overview
 
-This Cribl Edge pack collects Claude Code telemetry from 10 sources (9 file monitors + 1 OTLP receiver) and forwards it to a Cribl Stream worker group for indexing, analysis, and search:
+This Cribl Edge pack collects Claude Code telemetry from 10 sources (9 file monitors + 1 OTLP receiver) and forwards it to a
+Cribl Stream worker group for indexing, analysis, and search:
 
 1. **Session logs** — Monitors the Claude Code projects directory for `.jsonl` conversation transcript files and ships them in real time.
 2. **Command history** — `~/.claude/history.jsonl`
@@ -16,7 +17,7 @@ This Cribl Edge pack collects Claude Code telemetry from 10 sources (9 file moni
 
 ## Architecture
 
-```
+```text
 Claude Code (CLI) ──writes──▶ ~/.claude/projects/**/*.jsonl
        │                                 │
        │                      Cribl Edge (file monitor)
@@ -32,18 +33,23 @@ This pack collects two distinct types of data from Claude Code. You can enable o
 
 ### Session Logs (File Monitor)
 
-The file monitor input reads the `.jsonl` transcript files that Claude Code writes to disk during every conversation. These contain the **full content** of each session — what the user asked, what Claude responded, which tools were invoked, and what they returned. Use this data for:
+The file monitor input reads the `.jsonl` transcript files that Claude Code writes to disk during every conversation.
+These contain the **full content** of each session — what the user asked, what Claude responded, which tools were invoked,
+and what they returned. Use this data for:
 
 - **Audit and compliance** — Complete record of every interaction
 - **Session replay** — Reconstruct exactly what happened in a conversation
 - **Content analysis** — Search across prompts, responses, and tool outputs
 - **Cost tracking** — Per-session model usage, token counts, and USD cost from summary events
 
-> **Session file accumulation:** Claude Code writes one `.jsonl` file per conversation. The `cleanupPeriodDays` setting in `~/.claude/settings.json` controls how long transcripts are retained (default: 30 days, set to `0` to disable). With heavy daily usage, tens of thousands of files can accumulate if this is not set.
+> **Session file accumulation:** Claude Code writes one `.jsonl` file per conversation. The `cleanupPeriodDays` setting in
+> `~/.claude/settings.json` controls how long transcripts are retained (default: 30 days, set to `0` to disable). With heavy
+> daily usage, tens of thousands of files can accumulate if this is not set.
 
 ### OpenTelemetry (OTLP)
 
-The OTLP input receives **operational telemetry** pushed directly from Claude Code's built-in OpenTelemetry instrumentation over gRPC. This is structured metrics and logs — not conversation content. Use this data for:
+The OTLP input receives **operational telemetry** pushed directly from Claude Code's built-in OpenTelemetry instrumentation over gRPC.
+This is structured metrics and logs — not conversation content. Use this data for:
 
 - **Observability dashboards** — API latency, error rates, throughput
 - **Resource monitoring** — Token consumption trends, model usage patterns
@@ -52,7 +58,7 @@ The OTLP input receives **operational telemetry** pushed directly from Claude Co
 
 ### Choosing Between Them
 
-```
+```text
 Session Logs (File Monitor)
 ───────────────────────────────────────────────────
 What it captures         Full conversation content (prompts, responses, tool calls)
@@ -74,6 +80,29 @@ Contains PII             No
 
 ---
 
+## Data Contract
+
+Events leave this pack tagged with a `datatype` metadata field; Cribl Stream maps datatypes to Splunk sourcetypes/indexes per the table below.
+Knowledge objects for the sourcetypes ship in
+[VisiCore_TA_AI_Observability](https://github.com/JacobPEvans-personal/VisiCore_TA_AI_Observability) (v0.2.0+).
+
+| Input | Datatype | Splunk sourcetype | Index | TA support |
+|---|---|---|---|---|
+| `claude-code-session` | `claude-code-session` | `claude:code:session` | `claude` | ✓ |
+| `claude-code-history` | `claude-code-history` | `claude:code:history` | `claude` | ✓ |
+| `claude-code-stats` | `claude-code-stats` | `claude:code:stats` | `claude` | ✓ |
+| `claude-code-logs` | `claude-code-logs` | `claude:code:logs` | `claude` | ✓ |
+| `claude-code-plans` | `claude-code-plans` | `claude:code:plans` | `claude` | ✓ |
+| `claude-code-tasks` | `claude-code-tasks` | `claude:code:tasks` | `claude` | ✓ |
+| `claude-code-teams` | `claude-code-teams` | `claude:code:teams` | `claude` | ✓ |
+| `claude-code-plugins` | `claude-code-plugins` | `claude:code:plugins` | `claude` | ✓ |
+| `claude-code-otel` | `claude-code-otel` | `claude:code:otel` | `claude` | ✓ |
+
+> **Note:** `claude:code:subagent` is derived Stream-side from `claude:code:session` events where
+> `isSidechain=true` — it has no dedicated Edge input or datatype.
+
+---
+
 ## Requirements
 
 - **Cribl Edge** 4.13.0+
@@ -86,11 +115,14 @@ Contains PII             No
 
 ## Setup: Session Logs (File Monitor)
 
-The file monitor input requires two things: an environment variable telling Cribl Edge where the session logs live, and filesystem permissions so the Cribl Edge process can read them.
+The file monitor input requires two things: an environment variable telling Cribl Edge where the session logs live, and
+filesystem permissions so the Cribl Edge process can read them.
 
 ### Step 1: Set the `CLAUDE_HOME` Environment Variable
 
-All file monitor paths use `$CLAUDE_HOME/.claude/<subdir>` to resolve their target directories. Set `CLAUDE_HOME` to the **home directory** of the user that runs Claude Code. This variable must be set in the Cribl Edge environment. Restart the Cribl service after setting it.
+All file monitor paths use `$CLAUDE_HOME/.claude/<subdir>` to resolve their target directories. Set `CLAUDE_HOME` to the
+**home directory** of the user that runs Claude Code. This variable must be set in the Cribl Edge environment. Restart the
+Cribl service after setting it.
 
 > Note: replace `<user>` with the user that runs Claude Code.
 
@@ -119,7 +151,7 @@ Or add it via **System Properties > Environment Variables > System variables**.
 
 > After setting the variable, restart the Cribl Edge service for it to take effect.
 
-```
+```text
 Platform                 CLAUDE_HOME Value
 ─────────────────────────────────────────────────────────
 Linux                    /home/{user}
@@ -127,15 +159,17 @@ macOS                    /Users/{user}
 Windows                  C:\Users\{user}
 ```
 
-> **Note:** Some recent Claude Code versions on Linux may use `~/.config/claude/projects/` instead. Verify which directory contains your `.jsonl` session files before configuring the input.
+> **Note:** Some recent Claude Code versions on Linux may use `~/.config/claude/projects/` instead. Verify which directory
+> contains your `.jsonl` session files before configuring the input.
 
 ### Step 2: Grant Filesystem Permissions
 
 Claude Code creates `.jsonl` files with restrictive permissions. The approach to granting Cribl Edge read access differs by platform.
 
-#### Linux
+#### Linux Permissions
 
-Cribl Edge typically runs as the `cribl` user. Since Claude Code creates files with mode `0600` (owner-only), POSIX ACLs are required to grant read access without changing file ownership.
+Cribl Edge typically runs as the `cribl` user. Since Claude Code creates files with mode `0600` (owner-only), POSIX ACLs are
+required to grant read access without changing file ownership.
 
 **Directory ACLs:**
 
@@ -163,7 +197,8 @@ find /home/<user>/.claude/projects/ -type d -exec setfacl -m m::r-x {} +
 
 **Cron Job for New Files:**
 
-Since Claude Code will keep creating files with mode `0600`, add a cron job to periodically fix ACL masks on new `.jsonl` files. This cron entry must be added to the **`cribl` user's** crontab (not root), so the ACL changes are applied in the correct user context:
+Since Claude Code will keep creating files with mode `0600`, add a cron job to periodically fix ACL masks on new `.jsonl` files.
+This cron entry must be added to the **`cribl` user's** crontab (not root), so the ACL changes are applied in the correct user context:
 
 ```bash
 # Edit the cribl user's crontab
@@ -184,9 +219,10 @@ getfacl /home/<user>/.claude/projects/<project>/<session-id>.jsonl | grep mask
 # Expected: mask::r--
 ```
 
-#### macOS
+#### macOS Permissions
 
-On macOS, Cribl Edge is typically installed under the current user account (not a separate `cribl` service user). If Edge is running as the same user that owns the Claude Code session files, no additional permission changes are needed.
+On macOS, Cribl Edge is typically installed under the current user account (not a separate `cribl` service user).
+If Edge is running as the same user that owns the Claude Code session files, no additional permission changes are needed.
 
 If Edge runs as a different user, grant read access using macOS ACLs:
 
@@ -199,7 +235,8 @@ chmod +a "cribl allow read,readattr,readextattr,readsecurity,list,search" /Users
 chmod -R +a "cribl allow read,readattr,readextattr,readsecurity,list,search" /Users/<user>/.claude/projects/
 ```
 
-> **Note:** macOS does not support POSIX ACL masks the way Linux does. The `chmod +a` syntax is macOS-specific (uses the NFSv4 ACL model). A periodic `launchd` job or cron entry may still be needed if new files are created with restrictive permissions.
+> **Note:** macOS does not support POSIX ACL masks the way Linux does. The `chmod +a` syntax is macOS-specific (uses the
+> NFSv4 ACL model). A periodic `launchd` job or cron entry may still be needed if new files are created with restrictive permissions.
 
 **Verification:**
 
@@ -211,9 +248,10 @@ ls -le /Users/<user>/.claude/projects/
 sudo -u cribl cat /Users/<user>/.claude/projects/<project>/<session-id>.jsonl | head -1
 ```
 
-#### Windows
+#### Windows Permissions
 
-On Windows, Cribl Edge runs as the `LocalSystem` account by default. `LocalSystem` has broad read access to local files, so in most cases no additional permissions are required.
+On Windows, Cribl Edge runs as the `LocalSystem` account by default. `LocalSystem` has broad read access to local files,
+so in most cases no additional permissions are required.
 
 If Cribl Edge is configured to run under a custom service account, grant that account read access to the Claude Code projects directory:
 
@@ -248,7 +286,8 @@ Get-Content "C:\Users\<user>\.claude\projects\<project>\<session-id>.jsonl" -Fir
 
 ## Setup: OpenTelemetry (OTLP)
 
-The OTLP input is preconfigured in the pack and listens on port 4317 out of the box — no Cribl-side setup is needed. You just need to configure Claude Code to send telemetry to it.
+The OTLP input is preconfigured in the pack and listens on port 4317 out of the box — no Cribl-side setup is needed.
+You just need to configure Claude Code to send telemetry to it.
 
 Set the following environment variables in the shell where you run Claude Code:
 
@@ -263,7 +302,7 @@ export OTEL_LOGS_EXPORT_INTERVAL=5000
 export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
 ```
 
-```
+```text
 Variable                                              Description
 ─────────────────────────────────────────────────────────────────────────────────────────
 CLAUDE_CODE_ENABLE_TELEMETRY                          Enables Claude Code's built-in OTel instrumentation
@@ -276,7 +315,23 @@ OTEL_LOGS_EXPORT_INTERVAL                             Logs flush interval in ms 
 OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE     Metrics temporality (delta)
 ```
 
-> **Tip:** Add these exports to your shell profile (`.bashrc`, `.zshrc`, etc.) so they persist across sessions. If Cribl Edge is running on a remote host, replace `localhost` with the appropriate hostname or IP.
+> **Tip:** Add these exports to your shell profile (`.bashrc`, `.zshrc`, etc.) so they persist across sessions. If Cribl
+> Edge is running on a remote host, replace `localhost` with the appropriate hostname or IP.
+
+### Port Allocation
+
+OTLP ports are allocated org-wide so the AI telemetry packs can co-exist on a single Edge node — only one listener can bind
+a given port per node:
+
+| Port | Protocol | Owner |
+|---|---|---|
+| `4317` | OTLP/gRPC | **This pack** (`claude-code-otel` input) — canonical OTLP/gRPC default |
+| `4318` | OTLP/HTTP | Reserved for OTLP/HTTP (no pack ships an HTTP listener yet) |
+| `4319` | OTLP/gRPC | [cc-edge-copilot-otel](https://github.com/JacobPEvans-personal/cc-edge-copilot-otel) |
+| `4321` | OTLP/gRPC | [cc-edge-gemini-antigravity-io](https://github.com/JacobPEvans-personal/cc-edge-gemini-antigravity-io) |
+
+This pack owns `4317`. When co-deploying the Copilot or Gemini/Antigravity packs on the same Edge node,
+configure their OTLP sources to `4319` and `4321` respectively.
 
 ---
 
@@ -330,13 +385,15 @@ Forwards events to the Cribl Stream worker group for further routing and deliver
 
 ## Reference: Session Log Event Types
 
-Each line in a `.jsonl` session log file is a standalone JSON object. Most event types share a common envelope with fields like `sessionId`, `uuid`, `timestamp`, `cwd`, and `type`. The `assistant` and `user` events additionally carry an API-shaped `message` object with `content` blocks and `usage` telemetry.
+Each line in a `.jsonl` session log file is a standalone JSON object. Most event types share a common envelope with fields like
+`sessionId`, `uuid`, `timestamp`, `cwd`, and `type`. The `assistant` and `user` events additionally carry an API-shaped `message`
+object with `content` blocks and `usage` telemetry.
 
 ### Top-Level Event Types
 
 Identified by the `type` field on each JSON object:
 
-```
+```text
 Type                     Description
 ─────────────────────────────────────────────────────────
 assistant                Claude's response turns (text, tool invocations, token usage)
@@ -352,7 +409,7 @@ queue-operation          Message queue lifecycle events (enqueue/dequeue)
 
 `progress` events contain a `data.type` field that identifies the specific kind of progress update:
 
-```
+```text
 Subtype                  Description
 ─────────────────────────────────────────────────────────
 agent_progress           Subagent (Task tool) execution progress and streamed responses
@@ -393,7 +450,7 @@ Claude Code emits 13 telemetry signals over OTLP — 8 metrics and 5 events.
 
 Exported via `OTEL_METRICS_EXPORTER`. These are numerical measurements collected at the interval defined by `OTEL_METRIC_EXPORT_INTERVAL`.
 
-```
+```text
 Metric                                Description
 ─────────────────────────────────────────────────────────────────────────────
 claude_code.session.count              Number of Claude Code sessions started
@@ -410,7 +467,7 @@ claude_code.commit.count               Git commits created
 
 Exported via `OTEL_LOGS_EXPORTER`. These are discrete log entries emitted when specific actions occur during a session.
 
-```
+```text
 Event                                  Description
 ─────────────────────────────────────────────────────────────────────────────
 claude_code.user_prompt                User prompt submitted to Claude
@@ -434,14 +491,16 @@ claude_code.tool_decision              Model's decision to invoke a specific too
 4. Confirm the output destination is reachable.
 
 **EACCES errors in worker log (Linux):**
-The `cribl` user cannot read the `.jsonl` files. Run the ACL mask fix commands from the [Linux permissions](#linux) section and restart the Cribl Edge worker:
+The `cribl` user cannot read the `.jsonl` files. Run the ACL mask fix commands from the
+[Linux Permissions](#linux-permissions) section and restart the Cribl Edge worker:
 
 ```bash
 sudo -u cribl /opt/cribl/bin/cribl restart
 ```
 
 **Access denied errors (Windows):**
-If running Edge under a custom service account (not `LocalSystem`), apply the NTFS permissions from the [Windows permissions](#windows) section and restart the Cribl Edge service:
+If running Edge under a custom service account (not `LocalSystem`), apply the NTFS permissions from the
+[Windows Permissions](#windows-permissions) section and restart the Cribl Edge service:
 
 ```powershell
 Restart-Service CriblEdge
@@ -468,14 +527,30 @@ Cribl Edge tracks file state in its kvstore. If you need to re-ingest files from
 
 ---
 
+## Org Migration
+
+This repo's future home is [dryvist/cc-edge-claude-code-io](https://github.com/dryvist/cc-edge-claude-code-io).
+Content migration is tracked in [dryvist/cc-edge-claude-code-io#7](https://github.com/dryvist/cc-edge-claude-code-io/issues/7).
+Until the migration lands, this repo remains the canonical source of `.crbl` releases.
+
+---
+
 ## Release Notes
 
+- **1.2.8** — 2026-06-10
+  - Docs: add Data Contract section mapping inputs/datatypes to Splunk sourcetypes and indexes
+    (knowledge objects in VisiCore_TA_AI_Observability v0.2.0+)
+  - Docs: add org-wide OTLP Port Allocation table (this pack owns gRPC 4317; Copilot 4319; Gemini/Antigravity 4321; 4318 reserved for OTLP/HTTP)
+  - Docs: add Org Migration note pointing to the future dryvist/cc-edge-claude-code-io home
+  - Metadata: normalize `package.json` (pretty-print, trim trailing space in author); lint-clean README (line wraps, fence languages, unique headings)
 - **1.2.7** — 2026-03-11
-  - Increase `claude-code-session` interval 30s → 300s — `~/.claude/projects/` grows to 20K+ files with normal usage; statting the full tree every 30s causes sustained high CPU. 5-minute polling is ample for audit/analysis use cases
+  - Increase `claude-code-session` interval 30s → 300s — `~/.claude/projects/` grows to 20K+ files with normal usage; statting the full tree
+    every 30s causes sustained high CPU. 5-minute polling is ample for audit/analysis use cases
   - Increase `claude-code-logs` and `claude-code-tasks` intervals 30s → 60s — reduces stat overhead on recursive directories
   - Add session file accumulation note to README with `cleanupPeriodDays` context and example cron job
 - **1.2.6** — 2026-03-11
-  - Enable `tailOnly: true` on all file inputs — eliminates re-reading 121MB+ of JSONL data every poll cycle; Claude session files are append-only, only new appended data needs processing
+  - Enable `tailOnly: true` on all file inputs — eliminates re-reading 121MB+ of JSONL data every poll cycle; Claude session files are
+    append-only, only new appended data needs processing
   - Enable `checkFileModTime: true` on all file inputs — skips unchanged files entirely, eliminating I/O across 18K+ file paths in `.claude/projects/`
   - Increase interval 10s → 30s on `claude-code-session` and `claude-code-logs`
   - Add `CLAUDE.md` version bump policy (AI may bump minor/patch; major requires human approval)
@@ -505,15 +580,17 @@ Cribl Edge tracks file state in its kvstore. If you need to re-ingest files from
 
 ## Authors
 
-* Andrew Hendrix - <Andrewh@VisiCoreTech.com>
-* Jacob Evans - <jevans@VisiCoreTech.com>
+- Andrew Hendrix - <Andrewh@VisiCoreTech.com>
+- Jacob Evans - <jevans@VisiCoreTech.com>
 
 To contact us, please email <CriblPacks@VisiCoreTech.com>.
 
 ## Contributing to the Pack
 
-To contribute to this Pack, or to report any issues or enhancement requests, please connect with **VisiCore Tech** on [Cribl Community Slack](https://cribl-community.slack.com) or email us at: <CriblPacks@visicoretech.com>.
+To contribute to this Pack, or to report any issues or enhancement requests, please connect with **VisiCore Tech** on
+[Cribl Community Slack](https://cribl-community.slack.com) or email us at: <CriblPacks@visicoretech.com>.
 
 ## License
+
 ---
 This Pack uses the following license: [`Apache 2.0`](https://github.com/criblio/appscope/blob/master/LICENSE)
