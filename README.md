@@ -14,6 +14,28 @@ This Cribl Edge pack collects Claude Code telemetry from 10 sources (9 file moni
 8. **Plugins** — `~/.claude/plugins/installed_plugins.json`
 9. **OpenTelemetry (OTLP)** — Receives metrics and logs from Claude Code's built-in OTEL instrumentation via gRPC on port 4317.
 
+
+## Quick Start
+
+1. **Install the pack** in Cribl Edge via the Pack Browser (search "Claude Code") or upload the `.crbl` directly.
+
+2. **Set `CLAUDE_HOME`** to the home directory of the user running Claude Code, then restart the Cribl Edge service:
+   ```bash
+   # Linux
+   export CLAUDE_HOME=/home/<user>
+   # macOS
+   export CLAUDE_HOME=/Users/<user>
+   ```
+
+3. **Enable OTLP telemetry** in the shell where you run Claude Code:
+   ```bash
+   export CLAUDE_CODE_ENABLE_TELEMETRY=1
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+   export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+   ```
+
+Events appear in Cribl Edge within seconds. See [Setup: Session Logs](#setup-session-logs-file-monitor) and [Setup: OpenTelemetry](#setup-opentelemetry-otlp) for full platform-specific configuration, permissions, and troubleshooting.
+
 ## Architecture
 
 ```
