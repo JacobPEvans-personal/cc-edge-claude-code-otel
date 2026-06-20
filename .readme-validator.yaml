@@ -1,8 +1,10 @@
 # README validation config for Cribl Edge packs.
-# This pack uses "Setup: Session Logs" and "Setup: OpenTelemetry" (not a plain "Setup").
+# Standalone README standard: Installation + Usage are the required sections.
 required_sections:
-  - Pack Components
+  - Installation
+  - Usage
 optional_sections:
+  - Pack Components
   - Contributing to the Pack
   - Release Notes
   - Troubleshooting
