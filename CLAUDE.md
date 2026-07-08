@@ -20,7 +20,7 @@ This pack uses **semantic versioning**, independent of any other Cribl pack in t
 4. Merge PR to main
 5. Create the GitHub release directly — no local build needed:
    ```sh
-   gh release create vX.Y.Z --repo JacobPEvans-personal/cc-edge-claude-code-otel
+   gh release create vX.Y.Z --generate-notes --repo JacobPEvans-personal/cc-edge-claude-code-otel
    ```
    `.github/workflows/release.yml` triggers on `release: published`, builds the `.crbl` archive from
    `data default package.json README.md`, and uploads both a versioned and fixed-name asset to the
