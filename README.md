@@ -517,3 +517,7 @@ To contribute to this Pack, or to report any issues or enhancement requests, ple
 ## License
 ---
 This Pack uses the following license: [`Apache 2.0`](https://github.com/criblio/appscope/blob/master/LICENSE)
+
+---
+
+> Part of a [larger ecosystem of ~40 repos](https://docs.jacobpevans.com) — see how it all fits together.
