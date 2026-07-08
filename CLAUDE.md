@@ -4,8 +4,7 @@ Cribl Edge pack for Claude Code telemetry collection (session logs, OTLP).
 
 ## Version Policy
 
-This pack uses **semantic versioning** anchored to the VisiCore upstream.
-The JacobPEvans fork tracks the upstream `VisiCore/cc-edge-claude-code-otel` and publishes independent releases.
+This pack uses **semantic versioning**, independent of any other Cribl pack in this ecosystem.
 
 ### Rules for AI agents
 
@@ -15,21 +14,19 @@ The JacobPEvans fork tracks the upstream `VisiCore/cc-edge-claude-code-otel` and
 
 ### Release workflow
 
-1. Make changes on a feature branch (pushing to the `fork` remote: `JacobPEvans/cc-edge-claude-code-otel`)
+1. Make changes on a feature branch, PR against `main`
 2. Update `package.json` version (minor or patch only)
 3. Update the `## Release Notes` section in `README.md` with the new version entry
-4. Merge PR to main on the fork
-5. Create GitHub release with the `.crbl` artifact built locally:
+4. Merge PR to main
+5. Create the GitHub release directly — no local build needed:
    ```sh
-   tar -czf cc-edge-claude-code-otel-vX.Y.Z.crbl data default package.json README.md
-   cp cc-edge-claude-code-otel-vX.Y.Z.crbl cc-edge-claude-code-otel.crbl
-   gh release create vX.Y.Z --draft \
-     --repo JacobPEvans/cc-edge-claude-code-otel \
-     cc-edge-claude-code-otel-vX.Y.Z.crbl cc-edge-claude-code-otel.crbl
-   gh release edit vX.Y.Z --repo JacobPEvans/cc-edge-claude-code-otel --draft=false
+   gh release create vX.Y.Z --generate-notes --repo JacobPEvans-personal/cc-edge-claude-code-otel
    ```
-   Note: Create as draft with assets first, then publish. Publishing before uploading assets makes the release immutable.
-6. Update `install-packs.sh` in `kubernetes-monitoring` to reference the new version URL
+   `.github/workflows/release.yml` triggers on `release: published`, builds the `.crbl` archive from
+   `data default package.json README.md`, and uploads both a versioned and fixed-name asset to the
+   release automatically.
+6. Update the pinned release URL for this pack in its consumer (`orbstack-kubernetes`,
+   `k8s/monitoring/cribl-edge-standalone/statefulset.yaml`) to point at the new tag.
 
 ## File Operations
 
