@@ -1,0 +1,8 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+description: >-
+  Pass Claude Code telemetry events to the worker group unchanged for downstream
+  indexing and sourcetype assignment.
+functions: []
