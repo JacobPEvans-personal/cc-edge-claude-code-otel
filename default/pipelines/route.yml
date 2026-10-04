@@ -9,7 +9,7 @@ routes:
     pipeline: main
     description: "Claude Code session JSONL transcripts (includes subagent files)"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-session'
+    filter: datatype=='claude-code-session'
     clones: []
     output: default
   - id: history-logs
@@ -19,7 +19,7 @@ routes:
     pipeline: main
     description: "Claude Code command history"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-history'
+    filter: datatype=='claude-code-history'
     clones: []
     output: default
   - id: stats-cache
@@ -29,7 +29,7 @@ routes:
     pipeline: main
     description: "Claude Code usage statistics"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-stats'
+    filter: datatype=='claude-code-stats'
     clones: []
     output: default
   - id: app-logs
@@ -39,7 +39,7 @@ routes:
     pipeline: main
     description: "Claude Code application logs"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-logs'
+    filter: datatype=='claude-code-logs'
     clones: []
     output: default
   - id: plans
@@ -49,7 +49,7 @@ routes:
     pipeline: main
     description: "Claude Code implementation plans"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-plans'
+    filter: datatype=='claude-code-plans'
     clones: []
     output: default
   - id: tasks
@@ -59,7 +59,7 @@ routes:
     pipeline: main
     description: "Claude Code task lists"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-tasks'
+    filter: datatype=='claude-code-tasks'
     clones: []
     output: default
   - id: teams
@@ -69,7 +69,7 @@ routes:
     pipeline: main
     description: "Claude Code team configurations"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-teams'
+    filter: datatype=='claude-code-teams'
     clones: []
     output: default
   - id: plugins
@@ -79,7 +79,7 @@ routes:
     pipeline: main
     description: "Claude Code installed plugins"
     enableOutputExpression: false
-    filter: __inputId=='file:cc-edge-claude-code.claude-code-plugins'
+    filter: datatype=='claude-code-plugins'
     clones: []
     output: default
   - id: otel-input
@@ -89,6 +89,6 @@ routes:
     pipeline: main
     description: "OTLP telemetry from Claude Code sessions"
     enableOutputExpression: false
-    filter: __inputId=='open_telemetry:cc-edge-claude-code.claude-code-otel'
+    filter: datatype=='claude-code-otel'
     clones: []
     output: default
