@@ -6,89 +6,89 @@ routes:
     name: Session Logs (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code session JSONL transcripts (includes subagent files)"
     enableOutputExpression: false
     filter: datatype=='claude-code-session'
     clones: []
-    output: default
+    output: __group
   - id: history-logs
     name: History (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code command history"
     enableOutputExpression: false
     filter: datatype=='claude-code-history'
     clones: []
-    output: default
+    output: __group
   - id: stats-cache
     name: Stats Cache (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code usage statistics"
     enableOutputExpression: false
     filter: datatype=='claude-code-stats'
     clones: []
-    output: default
+    output: __group
   - id: app-logs
     name: Application Logs (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code application logs"
     enableOutputExpression: false
     filter: datatype=='claude-code-logs'
     clones: []
-    output: default
+    output: __group
   - id: plans
     name: Plans (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code implementation plans"
     enableOutputExpression: false
     filter: datatype=='claude-code-plans'
     clones: []
-    output: default
+    output: __group
   - id: tasks
     name: Tasks (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code task lists"
     enableOutputExpression: false
     filter: datatype=='claude-code-tasks'
     clones: []
-    output: default
+    output: __group
   - id: teams
     name: Teams (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code team configurations"
     enableOutputExpression: false
     filter: datatype=='claude-code-teams'
     clones: []
-    output: default
+    output: __group
   - id: plugins
     name: Plugins (File Monitor)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "Claude Code installed plugins"
     enableOutputExpression: false
     filter: datatype=='claude-code-plugins'
     clones: []
-    output: default
+    output: __group
   - id: otel-input
     name: OpenTelemetry (OTLP)
     final: true
     disabled: false
-    pipeline: main
+    pipeline: claude_telemetry
     description: "OTLP telemetry from Claude Code sessions"
     enableOutputExpression: false
     filter: datatype=='claude-code-otel'
     clones: []
-    output: default
+    output: __group

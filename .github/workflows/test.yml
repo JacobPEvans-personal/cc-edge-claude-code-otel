@@ -1,0 +1,15 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: dryvist/cc-edge-pack-template/.github/workflows/cribl-pack-test.yml@main
+    with:
+      pack_type: edge
