@@ -10,6 +10,6 @@ permissions:
 
 jobs:
   test:
-    uses: dryvist/cc-edge-pack-template/.github/workflows/cribl-pack-test.yml@main
+    uses: jpe-cribl/.github/.github/workflows/cribl-pack-test.yml@e74b14b20c29e990826227c84ebd9b503da3abb1 # main
     with:
       pack_type: edge
